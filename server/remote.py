@@ -2,6 +2,10 @@ import socket
 
 signaling_port = 10008
 data_channel_port = 10009
+TCP_SOCKET = None
+UDP_SOCKET = None
+TCP_REMOTE_PEER = None
+TCP_CONNECTION = None
 
 def readFrom(protocol, sock, bufSize = 1024):
     assert bufSize > 1
@@ -28,7 +32,7 @@ def setupParameters(tcpport = 10008, udpport = 10009):
     data_channel_port = udppport
     
 def initConnection():
-    global TCP_SOCKET, UDP_SOCKET, TCP_REMOTE_PEER, signaling_port
+    global TCP_CONNECTION, TCP_SOCKET, UDP_SOCKET, TCP_REMOTE_PEER, signaling_port, data_channel_port
     # if we're breaking up with the current pair, we close() the sockets in preparation for a nwe partner
     if TCP_SOCKET:
         TCP_SOCKET.close()
@@ -55,6 +59,7 @@ def initConnection():
 
     # now that everything is set up, we can set global objects that can be read from
     TCP_CONNECTION = conn
+    TCP_CONNECTION.sendTo("TCP", TCP_SOCKET, str(data_channel_port))
     TCP_REMOTE_PEER = addr
     UDP_SOCKET = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    UDP_SOCKET.bind( (addr[0], 10008) )
+    UDP_SOCKET.bind( (addr[0], 10009) )

@@ -6,15 +6,16 @@ try:
 except Exception as e:
     print(f"Failed to establish a connection to the remote: {e}")
 
-fn = 0
+fn = 1
 while True:
-    print("I am doing something while also listening to the remote.")
     r = remote.readFrom("UDP", remote.UDP_SOCKET, 2048)
-    if r:
-        print(r)
+    #print(r)
+    if r != None:
+        print("Received from remote: ",r)        
+        fn += 1
         
-    if fn % 25 == 0:
-        remote.sendTo("TCP", remote.TCP_SOCKET, f"Just received frame #{fn}")
-        
-        
-    fn += 1
+    if fn % 5 == 0:
+        remote.sendTo("TCP", remote.TCP_SOCKET, "I just recv'd frame #"+str(fn))
+            
+# 10.81.0.156
+# 192.168.137.1

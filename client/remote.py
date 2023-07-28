@@ -13,7 +13,7 @@ def sendTo(protocol, sock, message):
     global TCP_REMOTE_PEER
     assert protocol == "TCP"
     try:
-        sock.send(bytes(message, "ascii"))
+        sock.sendall(bytes(message, "ascii"))
         return None
     except (ConnectionResetError, OSError, BrokenPipeError):
         print("Cx Error! Attempting a reconnect...")
@@ -61,16 +61,17 @@ def init_connection(addr):
     TCP_SOCKET.connect( (addr, signaling_port) )
     global TCP_CONNECTION
     TCP_CONNECTION = TCP_SOCKET
+    TCP_SOCKET.setblocking(0)
     # on the other program, conn is the connected state of socket, but in this case both names refer to the same socket that we want to send to
 
     # now we have to wait for the UDP port number the remote wants
-    try:
-        udp_port = int(str(TCP_SOCKET.recv(1024), "ascii"))
-        print(f"Success! The remote peer has decided that the UDP will be over port {udp_port}")
-    except Exception as e:
-        print(f"Remote peer send an invalid negotiated UDP port number back [{udp_port}: {e}], unable to establish receiver for UDP packets.")
-        input("<ENTER> to exit.")
-        exit()
+    while True:
+        try:
+            udp_port = int(str(TCP_SOCKET.recv(1024), "ascii"))
+            print(f"Success! The remote peer has decided that the UDP will be over port {udp_port}")
+            break
+        except Exception as e:
+            print(f"Remote peer send an invalid negotiated UDP port number back [{udp_port}: {e}], unable to establish receiver for UDP packets.")
 
     UDP_SOCKET = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     UDP_SOCKET.setblocking(0)
